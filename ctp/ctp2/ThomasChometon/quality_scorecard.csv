@@ -1,0 +1,17 @@
+dimension,rule_in_plain_words,column,how_you_measured_it,failing_rows,total_rows,score_pct,severity_high_medium_low,who_should_fix_owner_steward_custodian
+Completeness,email is filled,email,isna().sum(),48,1241,96.13,medium,Steward
+Completeness,phone is filled,phone,isna().sum(),30,1241,97.58,low,Steward
+Uniqueness,customer_id is unique,customer_id,duplicated(keep=False),16,1241,98.71,high,Custodian
+Uniqueness,one account per email,email,strip+lower then duplicated(keep=False) on non-empty,120,1241,90.33,medium,Steward
+Validity,email looks like an email,email,"regex ^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$ on non-empty raw values",28,1241,97.74,medium,Owner
+Consistency,country is an ISO-2 code,country,not isin({FR DE ES BE}) on non-empty,299,1241,75.91,medium,Custodian
+Consistency,signup_date is YYYY-MM-DD,signup_date,regex ^\d{4}-\d{2}-\d{2}$,303,1241,75.58,low,Custodian
+Validity,loyalty_tier is bronze/silver/gold/platinum,loyalty_tier,not isin(allowed list),13,1241,98.95,medium,Custodian
+Accuracy,birth date is plausible,birth_date,ISO dates before 1906 or after today-18y,8,1241,99.36,medium,Owner
+Validity,French postal code has 5 digits,postal_code,regex ^\d{5}$ on French rows only,48,723,93.36,medium,Steward
+Uniqueness,orders: order_id is unique,order_id,GX expect_column_values_to_be_unique - why: a duplicate order is invoiced twice (slide 14),14,5207,99.73,critical,Custodian
+Consistency,orders: customer_id exists in customers,customer_id,GX expect_column_values_to_be_in_set - why: orphan orders cannot be shipped or invoiced: quarantine them (slide 14),14,5207,99.73,high,Steward
+Completeness,orders: order_date is filled,order_date,GX expect_column_values_to_not_be_null - why: needed for revenue per day and timeliness,11,5207,99.79,medium,Custodian
+Accuracy,orders: order_date is not in the future,order_date_dt,GX expect_column_values_to_be_between - why: an order cannot be placed tomorrow: wrong clock or typo,5,5207,99.9,high,Owner
+Validity,orders: status is one of the 5 allowed values,status,GX expect_column_values_to_be_in_set - why: badly spelled status is lost in reports: fix in transform and log it (slide 14),9,5207,99.83,medium,Steward
+Accuracy,orders: total_amount_eur is > 0 and <= 5000,total_amount_eur,GX expect_column_values_to_be_between - why: history max is 1400 EUR; <= 0 or > 5000 means a bug or the x100 cents error,6,5207,99.88,critical,Owner
